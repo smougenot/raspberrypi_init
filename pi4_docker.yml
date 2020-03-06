@@ -1,0 +1,8 @@
+---
+- hosts : pi4
+  become: true
+
+  roles:
+    - ansible-debian-bootstrap
+    - ansible-role-docker_arm
+ 

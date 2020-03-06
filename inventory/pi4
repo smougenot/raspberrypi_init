@@ -1,0 +1,2 @@
+[pi]
+pi4 ansible_python_interpreter=/usr/bin/python3
