@@ -1,0 +1,4 @@
+---
+
+raspian_enable_ssh: false
+raspian_enable_wifi: true

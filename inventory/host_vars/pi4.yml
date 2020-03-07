@@ -2,3 +2,4 @@
 dbs_hostname: 'pi4'
 dbs_use_systemd: true
 dbs_timezone: 'Europe/Paris'
+dbs_use_dotfiles: false

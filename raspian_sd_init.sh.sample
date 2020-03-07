@@ -1,0 +1,14 @@
+#!/bin/env bash
+
+#
+#  Sample settings you should customize
+#
+extra_vars=""
+extra_vars="${extra_vars} raspian_enable_ssh=true"
+extra_vars="${extra_vars} boot_dir=/run/media/XXX/boot"
+extra_vars="${extra_vars} raspian_wifi_ssid=myBoxWifi"
+extra_vars="${extra_vars} raspian_wifi_psk=very_secure_password"
+
+ansible-playbook \
+  --extra-vars="${extra_vars}" \
+  -vvv raspian_sd_init.yml

@@ -1,0 +1,27 @@
+---
+- name: install ufw
+  become: true
+  package:
+    name: "ufw"
+
+- block:
+
+  - name: setup open ports
+    become: true
+    ufw:
+      rule: "allow"
+      port: "{{ item }}"
+    with_items: "{{ firewall_open_ports }}"
+
+  - name: set default policy to deny and start firewall
+    become: true
+    ufw:
+      policy: "deny"
+      state: "enabled"
+  # Do not lock yourself away
+  when: firewall_open_ports is defined
+
+- name: Inform in case of missing configuration
+  debug:
+    msg: 'Missing configuration : firewall_open_ports. In order not to lock you out no rules have been modified'
+  when: firewall_open_ports is not defined
