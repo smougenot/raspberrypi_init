@@ -79,6 +79,7 @@
       path: '/etc/hosts'
       regexp: "127.0.0.1(.*\\s+){{ inventory_hostname | regex_replace('.local$','') }}"
       line:   '127.0.0.1\1 {{ raspian_first_boot_hostname }}'
+      backrefs: true
     when: change_hostname.changed
 
   when: raspian_first_boot_hostname is defined and raspian_first_boot_hostname | trim | length > 0
