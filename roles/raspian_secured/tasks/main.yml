@@ -13,6 +13,32 @@
     update_password: 'always'
   when: raspian_first_boot_pi_password is defined and raspian_first_boot_pi_password | trim | length > 0
 
+- name: update pi user, add aliases
+  copy:
+    src: 'bash_aliases'
+    dest: '/home/pi/.bash_aliases'
+    owner: 'pi'
+    group: 'pi'
+    mode: 0644
+
+- name: update pi user, tune bashrc
+  lineinfile:
+    path: '/home/pi/.bashrc'
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    # ensure alias file is sourced
+    - regexp: '\[ -f ~/\.bashrc_local \] && source ~/\.bashrc_local'
+      line:   '[ -f ~/.bashrc_local ] && source ~/.bashrc_local'
+    # tune history
+    - regexp: '^HISTFILESIZE=.*$'
+      line:    'HISTFILESIZE='
+    - regexp: '^HISTSIZE=.*$'
+      line:    'HISTSIZE='
+    - regexp: '^HISTCONTROL=.*$'
+      line:    'HISTCONTROL=ignoreboth:erasedups'
+
 # change sshd
 - name: ssh strenghtening (e.g. no more password login)
   lineinfile:
@@ -51,11 +77,11 @@
   - name: adjust /etc/hosts
     replace:
       path: '/etc/hosts'
-      regexp: '{{ inventory_hostname | regex_replace('\.local$','')}}'
-      replace: '{{ raspian_first_boot_hostname }}'
+      regexp: "127.0.0.1(.*\\s){{ inventory_hostname | regex_replace('.local$','') }}"
+      replace: '127.0.0.1\g<1> {{ raspian_first_boot_hostname }}'
     when: change_hostname.changed
 
-  when: raspian_first_boot_hostname is defined
+  when: raspian_first_boot_hostname is defined and raspian_first_boot_hostname | trim | length > 0
 
 # reboot
 - name: Reboot machine
@@ -63,4 +89,4 @@
   async: 1
   poll: 0
   ignore_errors: true
-  when: change_hostname is defined and change_hostname.changed
+  when: false and change_hostname is defined and change_hostname.changed

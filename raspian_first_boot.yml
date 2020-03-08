@@ -4,4 +4,4 @@
 
   roles:
     - raspian_secured
-    - firewall
+    - { role: firewall, firewall_open_ports: [ "{{ raspian_first_boot_ssh_port | default ssh }}", http, https] }

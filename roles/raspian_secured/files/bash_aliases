@@ -1,0 +1,10 @@
+
+alias egrep='egrep --color=auto'
+alias grep='grep --color=auto'
+alias df='df -h'
+alias du='du -h'
+alias free='free -m'
+alias ls='ls --color=auto'
+alias ll='ls -lh'
+alias l='ls -lah'
+alias s='sudo -s'
