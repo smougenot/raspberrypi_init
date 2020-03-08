@@ -1,0 +1,15 @@
+#!/bin/env bash
+
+#
+#  Sample settings you should customize
+#
+extra_vars=""
+extra_vars="${extra_vars} raspian_first_boot_pi_pub_key=keys/pi_id_rsa.pub"
+## use : mkpasswd --method=sha-512
+extra_vars="${extra_vars} raspian_first_boot_pi_password="
+extra_vars="${extra_vars} raspian_first_boot_hostname="
+
+ansible-playbook \
+  --extra-vars="${extra_vars}" \
+  --inventory inventory/ --ask-pass \
+  -vvv raspian_first_boot.yml

@@ -1,0 +1,7 @@
+---
+- hosts : raspberrypi.local
+  become: true
+
+  roles:
+    - raspian_secured
+    - firewall

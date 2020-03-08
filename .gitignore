@@ -1,2 +1,5 @@
 *.log*
-raspian_sd_init.sh
+/*.sh
+
+keys/*
+!keys/generate_keys.sh
