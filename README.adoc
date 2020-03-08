@@ -95,3 +95,36 @@ In this very same directory where this documentation is you have a sample shell 
 * customise it with the information gather earlier
 * execute the customised script
 
+## Secure raspian on first boot
+
+We need to secure the pi as soon as possible because we activated ssh service on the pi and the user named pi on the pi has a predictable password !!!!
+We'll do that the same way wi did for the storage ... with Ansible.
+
+### Locating the pi (mDNS, no IP address required)
+
+For the curious ones, locating the pi (IP address) is done using mDNS.
+Raspian comes already configured with the required software. Your computer OS should also deal with it.
+It works by broadcasting DNS informations inside your local network (e.g Wifi).
+The naming convention use the `hostname` (of the pi) plus `.local` (as the top level domain ... a reserved one for this kind of usage).
+
+On a fresh install of Raspian, the `hostname` is `raspberrypi` so you can connect to that pi using `ssh pi@raspberrypi.local`
+
+### generate ssh key
+
+If you already have a ssh key you'd like to use for accessing the pi (with user pi), copy the public key in `keys/pi_id_rsa.pub`
+If not, just run the script `key/generate_keys.sh`. It will generate one ssh key to use for connecting to the pi (user pi)
+
+This time in order to launch Ansible tools, the file is `raspian_first_boot.sh.sample`.
+* copy it or rename it (to get rid of the `.sample` extension)
+* customise it with the information gather earlier
+* execute the customised script
+
+:warning: you should change the host name of the pi since it is the default one for Raspian. If not, if you start another pi with a fresh Raspian, you will end having naming collision. In that case you will have to find/us ip addresse of the pi to connect to it. In other words, the mDNS trick would not work anymore.
+
+## Tune PI OS (thanks to `ansible-debian-bootstrap`)
+
+TODO
+
+## Put the pi at work
+
+TODO : with the usecase with docker + wheather
