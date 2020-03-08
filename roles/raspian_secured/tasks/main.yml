@@ -75,10 +75,10 @@
     register: change_hostname
 
   - name: adjust /etc/hosts
-    replace:
+    lineinfile:
       path: '/etc/hosts'
-      regexp: "127.0.0.1(.*\\s){{ inventory_hostname | regex_replace('.local$','') }}"
-      replace: '127.0.0.1\g<1> {{ raspian_first_boot_hostname }}'
+      regexp: "127.0.0.1(.*\\s+){{ inventory_hostname | regex_replace('.local$','') }}"
+      line:   '127.0.0.1\1 {{ raspian_first_boot_hostname }}'
     when: change_hostname.changed
 
   when: raspian_first_boot_hostname is defined and raspian_first_boot_hostname | trim | length > 0
@@ -89,4 +89,4 @@
   async: 1
   poll: 0
   ignore_errors: true
-  when: false and change_hostname is defined and change_hostname.changed
+  when: change_hostname is defined and change_hostname.changed

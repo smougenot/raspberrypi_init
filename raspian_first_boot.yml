@@ -3,5 +3,5 @@
   become: true
 
   roles:
+    - { role: firewall, firewall_open_ports: [ 22, "{{ raspian_first_boot_ssh_port | default('ssh') }}", http, https] }
     - raspian_secured
-    - { role: firewall, firewall_open_ports: [ "{{ raspian_first_boot_ssh_port | default ssh }}", http, https] }
