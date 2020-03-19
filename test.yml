@@ -1,0 +1,6 @@
+---
+- hosts : pi4.local
+  become: true
+
+  roles:
+    - pi_switch_off_button

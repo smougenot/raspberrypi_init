@@ -6,3 +6,7 @@
 	path = roles/ansible-role-docker_arm
 	url = https://github.com/geerlingguy/ansible-role-docker_arm.git
 	branch = master
+[submodule "roles/pi_switch_off_button"]
+	path = roles/pi_switch_off_button
+	url = https://github.com/smougenot/pi_switch_off_button.git
+	branch = master

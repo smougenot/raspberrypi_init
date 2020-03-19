@@ -5,3 +5,4 @@
   roles:
     - { role: firewall, firewall_open_ports: [ 22, "{{ raspian_first_boot_ssh_port | default('ssh') }}", http, https] }
     - raspian_secured
+    - pi_switch_off_button
