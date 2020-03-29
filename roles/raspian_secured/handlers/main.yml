@@ -1,5 +1,11 @@
 ---
-- name: sshd restart
+- name: 'sshd restart'
   service:
     name: 'ssh'
     state: 'restarted'
+
+- name: 'reboot machine'
+  reboot:
+    msg: 'Ansible updates triggered'
+    pre_reboot_delay: 60
+  ignore_errors: true

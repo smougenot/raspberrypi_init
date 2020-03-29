@@ -1,0 +1,68 @@
+---
+
+- block:
+    # add ssh (on demand)
+    - name: Enable ssh
+      copy:
+        content: ''
+        dest: '{{ raspian_sd_boot_mount_dir }}/ssh'
+        force: no
+        mode: 0740
+      when: raspian_enable_ssh
+
+    # enable wifi (on demand)
+    - name: Add wifi configuration
+      template:
+        dest: '{{ raspian_sd_boot_mount_dir }}/wpa_supplicant.conf'
+        src: wpa_supplicant.conf.j2
+        mode: 0740
+      when: raspian_enable_wifi and raspian_wifi_ssid is defined and raspian_wifi_psk is defined
+
+    # Manage SD + USB (mixed mode, the only available on pi4)
+    # Be sure we wait for root partition
+    # Do not try to resize partition on the SD card
+    - name: Change first boot commands
+      replace:
+        # backup: true
+        path: '{{ raspian_sd_boot_mount_dir }}/cmdline.txt'
+        regexp: '{{ item.regexp }}'
+        replace: '{{ item.replace }}'
+      with_items:
+        - regexp: '^((?!.+rootwait).+)$'
+          replace: '\g<1> rootwait'
+        - regexp: '^(.*\s)?init=/usr/lib/raspi-config/init_resize.sh(.*)'
+          replace: '\g<1>\g<2>'
+
+    # Manage SD + USB (mixed mode, the only available on pi4)
+    # Remove rootfs partition from SD
+    - block:
+      - name: Find device
+        shell: |
+          mount -v | grep 'on {{ raspian_sd_boot_mount_dir }} ' | cut -d' ' -f1
+        register: sd_boot_partition
+
+      - debug:
+          var: sd_boot_partition
+
+      - name: 'device sd info'
+        parted:
+          device: '{{ sd_boot_partition.stdout[:-1] }}'
+          unit: '{{ raspian_parted_unit }}'
+        register: device_sd_info
+
+      - block:
+        - name: 'Unmount Root partition from SD'
+          # Module mount does not unmount from device path
+          shell: |
+            umount '{{ device_sd_info.disk.dev }}{{ device_sd_info.partitions[1].num }}'
+
+        - name: Remove Root partition from SD if used with usb root
+          parted:
+            device: '{{ device_sd_info.disk.dev }}'
+            number: '{{ device_sd_info.partitions[1].num }}'
+            state: absent
+        when: device_sd_info.partitions | length > 1
+
+      when: raspian_usb_root_device is defined and raspian_usb_root_device
+
+  when: raspian_sd_boot_mount_dir is defined

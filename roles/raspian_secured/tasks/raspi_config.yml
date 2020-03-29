@@ -1,0 +1,55 @@
+---
+
+# Seem undocumented but raspi_config has a non interractive CLI
+# Here are some sample of the commands you can use
+# ~ look for function name into raspi_config
+#
+# raspi_config is here https://github.com/RPi-Distro/raspi-config/blob/master/raspi-config
+#
+# e.g.
+#sudo raspi-config nonint get_can_expand
+#sudo raspi-config nonint do_expand_rootfs
+#sudo raspi-config nonint get_hostname
+#sudo raspi-config nonint do_hostname %s
+#sudo raspi-config nonint get_boot_cli
+#sudo raspi-config nonint get_autologin
+#sudo raspi-config nonint do_boot_behaviour B1
+#sudo raspi-config nonint do_boot_behaviour B2
+#sudo raspi-config nonint do_boot_behaviour B3
+#sudo raspi-config nonint do_boot_behaviour B4
+#sudo raspi-config nonint get_boot_wait
+#sudo raspi-config nonint do_boot_wait %d
+#sudo raspi-config nonint get_boot_splash
+#sudo raspi-config nonint do_boot_splash %d
+#sudo raspi-config nonint get_overscan
+#sudo raspi-config nonint do_overscan %d
+#sudo raspi-config nonint get_camera
+#sudo raspi-config nonint do_camera %d
+#sudo raspi-config nonint get_ssh
+#sudo raspi-config nonint do_ssh %d
+#sudo raspi-config nonint get_vnc
+#sudo raspi-config nonint do_vnc %d
+#sudo raspi-config nonint get_spi
+#sudo raspi-config nonint do_spi %d
+#sudo raspi-config nonint get_i2c
+#sudo raspi-config nonint do_i2c %d
+#sudo raspi-config nonint get_serial
+#sudo raspi-config nonint get_serial_hw
+#sudo raspi-config nonint do_serial %d
+#sudo raspi-config nonint get_onewire
+#sudo raspi-config nonint do_onewire %d
+#sudo raspi-config nonint get_rgpio
+#sudo raspi-config nonint do_rgpio %d
+#sudo raspi-config nonint get_pi_type
+#sudo raspi-config nonint get_config_var arm_freq /boot/config.txt
+#sudo raspi-config nonint do_overclock %s
+#sudo raspi-config nonint get_config_var gpu_mem /boot/config.txt
+#sudo raspi-config nonint get_config_var gpu_mem_256 /boot/config.txt
+#sudo raspi-config nonint get_config_var gpu_mem_512 /boot/config.txt
+#sudo raspi-config nonint get_config_var gpu_mem_1024 /boot/config.txt
+#sudo raspi-config nonint do_memory_split %d
+#sudo raspi-config nonint get_config_var hdmi_group /boot/config.txt
+#sudo raspi-config nonint get_config_var hdmi_mode /boot/config.txt
+#sudo raspi-config nonint do_resolution %d %d
+#sudo raspi-config nonint get_wifi_country
+#sudo raspi-config nonint do_wifi_country %s
