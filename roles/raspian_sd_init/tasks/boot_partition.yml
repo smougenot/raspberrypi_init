@@ -51,6 +51,22 @@
         register: device_sd_info
 
       - block:
+
+        #
+        # Be fool proof when altering partitions
+        # Ensure boot partition is realy on a SD card
+
+        - name: 'is this device a SD card storage device'
+          shell: |
+            readlink /sys/block/{{ device_sd_info.disk.dev | regex_replace('/dev/','') }}
+          register: device_sd_block
+        - name: 'device SD block info debug'
+          debug:
+            var: device_sd_block
+        - fail:
+            msg: 'Not a SD card storage device : {{ device_sd_info.disk.dev }} {{ device_sd_block.stdout }}'
+          when: 'not "/mmc" in device_sd_block.stdout'
+
         - name: 'Unmount Root partition from SD'
           # Module mount does not unmount from device path
           shell: |

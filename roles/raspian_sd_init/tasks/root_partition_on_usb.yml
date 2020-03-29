@@ -11,6 +11,10 @@
     debug:
       var: device_usb_info
 
+  #
+  # Be fool proof when altering partitions
+  # Ensure root partition is realy on a USB
+
   - name: 'is this device a USB storage device'
     shell: |
       readlink /sys/block/{{ device_usb_info.disk.dev | regex_replace('/dev/','') }}
