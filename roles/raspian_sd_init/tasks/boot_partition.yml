@@ -38,7 +38,7 @@
     - block:
       - name: Find device
         shell: |
-          mount -v | grep 'on {{ raspian_sd_boot_mount_dir }} ' | cut -d' ' -f1'
+          mount -v | grep 'on {{ raspian_sd_boot_mount_dir }} ' | cut -d' ' -f1
         register: sd_boot_partition
 
       - debug:
@@ -46,15 +46,21 @@
 
       - name: 'device sd info'
         parted:
-          device: '{{ sd_boot_partition.stdout }}'
+          device: '{{ sd_boot_partition.stdout[:-1] }}'
           unit: '{{ raspian_parted_unit }}'
         register: device_sd_info
 
-      - name: Remove Root partition from SD if used with usb root
-        parted:
-          device: '{{ device_sd_info.disk.dev }}'
-          number: '{{ device_sd_info.partitions[0].num }}'
-          state: absent
+      - block:
+        - name: 'Unmount Root partition from SD'
+          # Module mount does not unmount from device path
+          shell: |
+            umount '{{ device_sd_info.disk.dev }}{{ device_sd_info.partitions[1].num }}'
+
+        - name: Remove Root partition from SD if used with usb root
+          parted:
+            device: '{{ device_sd_info.disk.dev }}'
+            number: '{{ device_sd_info.partitions[1].num }}'
+            state: absent
         when: device_sd_info.partitions | length > 1
 
       when: raspian_usb_root_device is defined and raspian_usb_root_device

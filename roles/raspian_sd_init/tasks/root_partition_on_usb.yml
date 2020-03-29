@@ -2,23 +2,25 @@
 
 - block:
 
-  - name: 'device info'
+  - name: 'device usb info'
     parted:
        device: '{{ raspian_usb_root_device }}'
        unit: '{{ raspian_parted_unit }}'
     register: device_usb_info
-  - debug:
+  - name: 'device usb info debug'
+    debug:
       var: device_usb_info
 
   - name: 'is this device a USB storage device'
     shell: |
       readlink /sys/block/{{ device_usb_info.disk.dev | regex_replace('/dev/','') }}
     register: device_usb_block
-  - debug:
-    var: device_usb_block
+  - name: 'device usb block info debug'
+    debug:
+      var: device_usb_block
   - fail:
       msg: 'Not a USB storage device : {{ device_usb_info.disk.dev }} {{ device_usb_block.stdout }}'
-    when: '"/usb" in device_usb_block.stdout'
+    when: 'not "/usb" in device_usb_block.stdout'
 
   #
   # Device is supposed to have 2 partitions :
@@ -31,9 +33,13 @@
   - block:
     - debug:
         msg: 'Removing boot partition'
+    - name: 'Unmount boot partition from USB'
+      # Module mount does not unmount from device path
+      shell: |
+        umount '{{ device_usb_info.disk.dev }}{{ device_usb_info.partitions[0].num }}'
     - name: 'Remove partition'
       parted:
-        device: '{{ raspian_usb_root_device }}'
+        device: '{{ device_usb_info.disk.dev }}'
         number: '{{ device_usb_info.partitions[0].num }}'
         state: absent
     when: device_usb_info.partitions | length > 1 and device_usb_info.partitions[0].num != 2
@@ -41,13 +47,21 @@
   - block:
     - debug:
         msg: 'Resizing rootfs'
+    - name: 'Unmount rootf partition from USB'
+      # Module mount does not unmount from device path
+      shell: |
+        umount '{{ device_usb_info.disk.dev }}{{ device_usb_info.partitions[-1].num }}'
+      ignore_errors: true
+    - name: 'perform file system check'
+      shell: |
+        e2fsck -pf '{{ device_usb_info.disk.dev }}{{ device_usb_info.partitions[-1].num }}'
     - name: 'Grow partition'
       # Module parted does not grow partitions
-      command: 'parted --script {{ raspian_usb_root_device }} resizepart {{ device_usb_info.partitions[-1].num }} 100%'
+      command: 'parted --script {{ device_usb_info.disk.dev }} resizepart {{ device_usb_info.partitions[-1].num }} 100%'
     - name: 'Grow filesystem'
       filesystem:
         fstype: ext4
-        dev: "{{ raspian_usb_root_device }}{{ device_usb_info.partitions[-1].num }}"
+        dev: "{{ device_usb_info.disk.dev }}{{ device_usb_info.partitions[-1].num }}"
         resizefs: yes
     when: device_usb_info.disk.size > device_usb_info.partitions[-1].end
 
