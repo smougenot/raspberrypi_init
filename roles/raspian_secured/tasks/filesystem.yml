@@ -1,0 +1,6 @@
+---
+
+- name: 'Expand root partition'
+  shell: |
+    resize2fs "$(mount -v | grep 'on / ' | cut -d' ' -f1)"
+  notify: 'reboot machine'

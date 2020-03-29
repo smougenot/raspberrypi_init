@@ -1,6 +1,6 @@
 # Some tooling to automate Rapberry pi installation
 
-Goa of this repo is to easy rapid raspberry pi installation.
+The goal of this repo is to easy rapid raspberry pi installation.
 Doing this in a repeatable ... and fast way. Yes your pi wil fail eventually and you will have to do a fresh start soon.
 
 My use case samples :
@@ -30,7 +30,7 @@ e.g.
 
  ## Get Raspian OS
 
- You can find your way at the [official Raspian download site](https://www.raspberrypi.org/documentation/installation/installing-images/README.md)
+ You can find your way at the https://www.raspberrypi.org/documentation/installation/installing-images/README.md[official Raspian download site]
 
 ## Prepare storage
 
@@ -48,42 +48,51 @@ We will use 2 storages
 
 We have to 'burn' the image on each of those storage (yes double work).
 
-My tool of choice is [Etcher](https://etcher.download/)
+My tool of choice is https://etcher.download/[Etcher]
 
-### Remove unused partitions
+### Unused partitions
 
 As mentionned at the beginning each storage device will be responsible for hosting only one partition.
 But we burned the same thing on both of them. It means we have both partitions (`rootfs` and `boot`) on each storage device.
 
-Use your partition tool of choice to remove what we do not need :
-* remove `rootfs` partition from the SD card
-* remove `boot` partition from the USB storage
+At this point we can rely on automation provided by this repo to remove unwanted partitions.
 
-Because we used the same image we do not need to bother about `PARTUUID` they are correct.
+Because we used the same image we do not need to bother about `PARTUUID` to change in any file, they are correct.
 
-At this point we can rely on automation provided by this repo
+The partition we use :
+* `boot` partition from the SD card
+* `rootfs` partition from the USB storage
 
-## Tune the OS before first boot
+## Tune the SD & USB before first boot
 
 Goal : make sure our pi will boot
 
 ### Prepare tools
 
 First we need Ansible to run all this.
-You can find what we need at [Ansible installation instruction page](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-with-pip)
+You can find what we need at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-with-pip[Ansible installation instruction page]
+
+### Be sure to plug device in the correct order
+
+As mentionned before, this process uses 2 devices with the same set of partitions. +
+And we need to tweek the boot partition on the SD card. +
+So please insert USB device first then SD card.
 
 ### Gather settings informations
 
 1- find where is the boot partition.
-Usualy on recent linux partitions are automaically mounted.
-So just make sure your SD card is in ... and grab the path associated.
+Usualy on recent linux partitions are automatically mounted. +
+So just make sure your SD card is connected ... and grab the path associated.
 e.g.
 
     df -h
     /dev/sdb1   253M     53M  200M  21% /run/media/smougenot/boot
 So in my case `boot` partition content is in `/run/media/smougenot/boot`
 
-2- Wifi
+2- Locate USB device
+  Using tools like `lsblk` or `fdisk -l` you can pinpoint the device associated to your USB storage (e.g. /dev/sdc)
+
+3- Wifi
 If you need your pi to use Wifi, we need to add information about it.
 * the wifi ssid
 * the password

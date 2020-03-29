@@ -1,0 +1,47 @@
+---
+
+# change sshd
+- name: ssh strenghtening (e.g. no more password login)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    - regexp: '^PermitRootLogin\s+(yes|no)$'
+      line:    'PermitRootLogin no'
+    - regexp: '^PasswordAuthentication\s+(yes|no)$'
+      line:    'PasswordAuthentication no'
+    - regexp: '^UsePAM\s+(yes|no)$'
+      line:    'UsePAM no'
+    - regexp: '^ClientAliveInterval\s+\d+$'
+      line:    'ClientAliveInterval 360'
+    - regexp: '^ClientAliveCountMax\s+\d+$'
+      line:    'ClientAliveCountMax 0'
+  notify: 'sshd restart'
+- name: ssh change port
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^Port\s+\d+$'
+    line:   'Port {{ raspian_first_boot_ssh_port }}'
+    state: present
+  notify: 'sshd restart'
+  when: raspian_first_boot_ssh_port is defined and raspian_first_boot_ssh_port | trim | length > 0
+
+# change host name .... will require reboot
+- block:
+  - name: change host name
+    hostname:
+      name: "{{ raspian_first_boot_hostname }}"
+    register: change_hostname
+    notify: 'reboot machine'
+
+  - name: adjust /etc/hosts
+    lineinfile:
+      path: '/etc/hosts'
+      regexp: "127.0.0.1(.*\\s+){{ inventory_hostname | regex_replace('.local$','') }}"
+      line:   '127.0.0.1\1 {{ raspian_first_boot_hostname }}'
+      backrefs: true
+    when: change_hostname.changed
+
+  when: raspian_first_boot_hostname is defined and raspian_first_boot_hostname | trim | length > 0

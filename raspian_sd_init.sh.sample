@@ -5,7 +5,8 @@
 #
 extra_vars=""
 extra_vars="${extra_vars} raspian_enable_ssh=true"
-extra_vars="${extra_vars} boot_dir=/run/media/XXX/boot"
+extra_vars="${extra_vars} raspian_sd_boot_mount_dir=/run/media/XXX/boot"
+extra_vars="${extra_vars} raspian_usb_root_device=/dev/sdX"
 extra_vars="${extra_vars} raspian_wifi_ssid=myBoxWifi"
 extra_vars="${extra_vars} raspian_wifi_psk=very_secure_password"
 

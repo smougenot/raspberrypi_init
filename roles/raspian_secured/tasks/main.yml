@@ -1,93 +1,10 @@
 ---
 
-- name: update pi user to add ssh authorisez keys
-  authorized_key:
-    user: 'pi'
-    state: present
-    key: "{{ lookup('file', raspian_first_boot_pi_pub_key) }}"
+- name: 'Customise File system'
+  import_tasks: 'raspi_config.yml'
 
-- name: update pi user password
-  user:
-    name: 'pi'
-    password: '{{ raspian_first_boot_pi_password }}'
-    update_password: 'always'
-  when: raspian_first_boot_pi_password is defined and raspian_first_boot_pi_password | trim | length > 0
+- name: 'Customise Pi user'
+  import_tasks: 'pi_user.yml'
 
-- name: update pi user, add aliases
-  copy:
-    src: 'bash_aliases'
-    dest: '/home/pi/.bash_aliases'
-    owner: 'pi'
-    group: 'pi'
-    mode: 0644
-
-- name: update pi user, tune bashrc
-  lineinfile:
-    path: '/home/pi/.bashrc'
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    state: present
-  with_items:
-    # ensure alias file is sourced
-    - regexp: '\[ -f ~/\.bashrc_local \] && source ~/\.bashrc_local'
-      line:   '[ -f ~/.bashrc_local ] && source ~/.bashrc_local'
-    # tune history
-    - regexp: '^HISTFILESIZE=.*$'
-      line:    'HISTFILESIZE='
-    - regexp: '^HISTSIZE=.*$'
-      line:    'HISTSIZE='
-    - regexp: '^HISTCONTROL=.*$'
-      line:    'HISTCONTROL=ignoreboth:erasedups'
-
-# change sshd
-- name: ssh strenghtening (e.g. no more password login)
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    state: present
-  with_items:
-    - regexp: '^PermitRootLogin\s+(yes|no)$'
-      line:    'PermitRootLogin no'
-    - regexp: '^PasswordAuthentication\s+(yes|no)$'
-      line:    'PasswordAuthentication no'
-    - regexp: '^UsePAM\s+(yes|no)$'
-      line:    'UsePAM no'
-    - regexp: '^ClientAliveInterval\s+\d+$'
-      line:    'ClientAliveInterval 360'
-    - regexp: '^ClientAliveCountMax\s+\d+$'
-      line:    'ClientAliveCountMax 0'
-  notify: 'sshd restart'
-- name: ssh change port
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^Port\s+\d+$'
-    line:   'Port {{ raspian_first_boot_ssh_port }}'
-    state: present
-  notify: 'sshd restart'
-  when: raspian_first_boot_ssh_port is defined and raspian_first_boot_ssh_port | trim | length > 0
-
-# change host name .... will require reboot
-- block:
-  - name: change host name
-    hostname:
-      name: "{{ raspian_first_boot_hostname }}"
-    register: change_hostname
-
-  - name: adjust /etc/hosts
-    lineinfile:
-      path: '/etc/hosts'
-      regexp: "127.0.0.1(.*\\s+){{ inventory_hostname | regex_replace('.local$','') }}"
-      line:   '127.0.0.1\1 {{ raspian_first_boot_hostname }}'
-      backrefs: true
-    when: change_hostname.changed
-
-  when: raspian_first_boot_hostname is defined and raspian_first_boot_hostname | trim | length > 0
-
-# reboot
-- name: Reboot machine
-  shell: sleep 2 && shutdown -r +1 "Ansible updates triggered"
-  async: 1
-  poll: 0
-  ignore_errors: true
-  when: change_hostname is defined and change_hostname.changed
+- name: 'Customize network'
+  import_tasks: 'network.yml'

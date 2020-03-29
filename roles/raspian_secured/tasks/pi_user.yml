@@ -1,0 +1,40 @@
+---
+
+- name: update pi user to add ssh authorisez keys
+  authorized_key:
+    user: 'pi'
+    state: present
+    key: "{{ lookup('file', raspian_first_boot_pi_pub_key) }}"
+
+- name: update pi user password
+  user:
+    name: 'pi'
+    password: '{{ raspian_first_boot_pi_password }}'
+    update_password: 'always'
+  when: raspian_first_boot_pi_password is defined and raspian_first_boot_pi_password | trim | length > 0
+
+- name: update pi user, add aliases
+  copy:
+    src: 'bash_aliases'
+    dest: '/home/pi/.bash_aliases'
+    owner: 'pi'
+    group: 'pi'
+    mode: 0644
+
+- name: update pi user, tune bashrc
+  lineinfile:
+    path: '/home/pi/.bashrc'
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    # ensure alias file is sourced
+    - regexp: '\[ -f ~/\.bashrc_local \] && source ~/\.bashrc_local'
+      line:   '[ -f ~/.bashrc_local ] && source ~/.bashrc_local'
+    # tune history
+    - regexp: '^HISTFILESIZE=.*$'
+      line:    'HISTFILESIZE='
+    - regexp: '^HISTSIZE=.*$'
+      line:    'HISTSIZE='
+    - regexp: '^HISTCONTROL=.*$'
+      line:    'HISTCONTROL=ignoreboth:erasedups'
