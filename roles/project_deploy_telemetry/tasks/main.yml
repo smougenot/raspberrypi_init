@@ -1,0 +1,43 @@
+---
+
+# git
+- name: Install git
+  apt:
+    pkg:
+      - 'git'
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+# clone
+- name: Init Data directory
+  file:
+    dest: '/data'
+    state: directory
+    owner: 'sylvain'
+    group: 'sylvain'
+    mode: 0775
+
+- name: Clone project
+  git:
+    repo: 'https://github.com/smougenot/telemetry.git'
+    dest: '/data/telemetry'
+    version: 'master'
+
+- name: Config secrets
+  template:
+    src: 'secrets.env.j2'
+    dest: '/data/telemetry/secrets.env'
+    owner: 'sylvain'
+    group: 'sylvain'
+    mode: 0770
+
+- name: Ensure Docker stack is ready
+  command:
+    cmd: 'docker swarm init'
+
+# start
+- name: Start project
+  shell:
+    cmd: |
+      '/data/telemetry/start_stack.sh'

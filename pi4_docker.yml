@@ -6,3 +6,4 @@
     - ansible-debian-bootstrap
     - raspian_prepare_docker_compose
     - ansible-role-docker_arm
+    - project_deploy_telemetry
