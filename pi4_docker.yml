@@ -1,8 +1,8 @@
 ---
-- hosts : pi4
+- hosts : pi4.local
   become: true
 
   roles:
     - ansible-debian-bootstrap
+    - raspian_prepare_docker_compose
     - ansible-role-docker_arm
- 

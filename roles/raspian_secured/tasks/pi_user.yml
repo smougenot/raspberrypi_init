@@ -21,6 +21,14 @@
     group: 'pi'
     mode: 0644
 
+- name: update useradd skel, add aliases
+  copy:
+    src: 'bash_aliases'
+    dest: '/etc/skel/.bash_aliases'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+
 - name: update pi user, tune bashrc
   lineinfile:
     path: '/home/pi/.bashrc'
