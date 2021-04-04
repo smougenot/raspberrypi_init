@@ -126,6 +126,7 @@ If not, just run the script `key/generate_keys.sh`. It will generate one ssh key
 This time in order to launch Ansible tools, the file is `raspian_first_boot.sh.sample`.
 * copy it or rename it (to get rid of the `.sample` extension)
 * customise it with the information gather earlier
+  * password must be 'encoded' using `mkpasswd --method=sha-512`
 * execute the customised script
 
 :warning: you should change the host name of the pi since it is the default one for Raspian. If not, if you start another pi with a fresh Raspian, you will end having naming collision. In that case you will have to find/us ip addresse of the pi to connect to it. In other words, the mDNS trick would not work anymore.
