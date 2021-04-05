@@ -1,0 +1,6 @@
+---
+
+raspian_enable_ssh: false
+raspian_enable_wifi: true
+
+raspian_boot_mount_dir: null

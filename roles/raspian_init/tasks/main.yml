@@ -1,0 +1,4 @@
+---
+
+- name: 'Tune boot partition'
+  import_tasks: 'boot_partition.yml'
