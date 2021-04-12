@@ -1,0 +1,13 @@
+---
+- name: get required native packages
+  ansible.builtin.package:
+    name: '{{item}}'
+    state: present
+  with_items:
+    - 'git'
+    - 'curl'
+
+
+- name: get & install iotstack
+  command: |
+    curl -fsSL https://raw.githubusercontent.com/SensorsIot/IOTstack/master/install.sh | bash

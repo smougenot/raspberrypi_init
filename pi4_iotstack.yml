@@ -1,0 +1,10 @@
+#!/usr/bin/env ansible-playbook
+---
+- hosts : iotstack.local
+  become: true
+
+  roles:
+    - ansible-debian-bootstrap
+    - raspian_prepare_docker_compose
+    - ansible-role-docker_arm
+    - get_iotstack
