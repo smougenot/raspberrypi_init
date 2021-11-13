@@ -1,0 +1,34 @@
+---
+
+## see https://github.com/HanXHX/ansible-debian-bootstrap
+
+dbs_set_hostname: true
+dbs_clean_hosts: true
+
+dbs_use_systemd: true
+dbs_timezone: 'Europe/Paris'
+dbs_use_dotfiles: false
+
+
+dbs_locales:
+  - 'en_US.UTF-8'
+  - 'fr_FR.UTF-8'
+
+dbs_users:
+  - name: 'sylvain'
+    password: '$6$SNThMeTD83GrC/f4$fFFDAGfKpICRiV0WGKxtLdmR08vrKjrh4x.UrcE1NdwBMfbRam2PE3uvzkyqquxQDKqbSH2JIP5dNY9oYxwjO/'
+    groups: |
+      adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,netdev,spi,i2c,gpio
+    createhome: true
+    sudo: true
+    ssh_keys:
+      - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDjm1UEwE5V3Cro8EkmyMh1n0Ct16Gju5mgMH+V+6bEdYmwZTu8zCIUgrZqigu+YGgNoahc2b/F5o/Umh9npnDL1CfgPIi9oRu+XfuRGos343cfzBbOz2GFdSDwWir22bfkY9k7AAZyZ86K2OneUJPWiY4HvOSjqkaCiJIOyjZa/H8zlgI7EjDWZNEZG4Awn8pmWsYizvp7+JgAlFGMLYr807tp5bQ/L/QP8LTKU0UN3Q6XQ9035MlD/Nd3POPEbgGxDZ92LgzIQmCfbHQcJ8DUqZyG/H0KuuDOiOzzc7/BvVmXQL1iVlaGXFpimneUW3xTTeH2Cf/uNfbs0QYZkwAr smougenot@sqli506225.localdomain'
+    shell: '/bin/bash'
+
+## see https://github.com/geerlingguy/ansible-role-docker_arm
+
+docker_install_compose: true
+docker_users:
+  - pi
+  - sylvain
+docker_pip_executable: 'pip3'
