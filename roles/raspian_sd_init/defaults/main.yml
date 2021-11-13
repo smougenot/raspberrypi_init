@@ -1,5 +1,0 @@
----
-raspian_sd_boot_mount_dir: null
-
-raspian_usb_root_device: null
-raspian_parted_unit: 'MiB'

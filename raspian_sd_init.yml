@@ -1,8 +1,0 @@
----
-- name: Init sd for Raspian
-  hosts : localhost
-  connection: local
-  become: true
-
-  roles:
-    - raspian_sd_init

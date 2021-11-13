@@ -1,7 +1,0 @@
----
-
-- name: 'Tune boot partition'
-  import_tasks: 'boot_partition.yml'
-
-- name: 'Use usb device as root partition'
-  import_tasks: 'root_partition_on_usb.yml'
