@@ -18,20 +18,6 @@
         mode: 0740
       when: raspian_enable_wifi and raspian_wifi_ssid is defined and raspian_wifi_psk is defined
 
-    # Be sure we wait for root partition
-    # Do not try to resize partition
-    - name: Change first boot commands
-      replace:
-        # backup: true
-        path: '{{ raspian_boot_mount_dir }}/cmdline.txt'
-        regexp: '{{ item.regexp }}'
-        replace: '{{ item.replace }}'
-      with_items:
-        - regexp: '^((?!.+rootwait).+)$'
-          replace: '\g<1> rootwait'
-        - regexp: '^(.*\s)?init=/usr/lib/raspi-config/init_resize.sh(.*)'
-          replace: '\g<1>\g<2>'
-
     # Overlay allow to have a shutdown button without dedicated code
     # https://github.com/pali/raspberrypi-linux/blob/rpi-4.19.y/arch/arm/boot/dts/overlays/README#L879 
     - name: Power on/off simple button
