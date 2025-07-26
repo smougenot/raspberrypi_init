@@ -6,3 +6,5 @@ keys/*
 
 !setup_*.sh
 !test_ansible_env.sh
+!ansible.sh
+!cleanup_env.sh

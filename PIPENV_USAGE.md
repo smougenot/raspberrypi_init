@@ -1,5 +1,27 @@
 # Installation et Utilisation d'Ansible avec pipenv
 
+## Approches d'installation
+
+### 🎯 **Recommandée: pyenv + pipenv (sans impact système)**
+```bash
+./setup_pyenv_pipenv.sh
+```
+Cette approche :
+- ✅ N'installe rien au niveau système (pas de `sudo dnf install`)
+- ✅ Gère automatiquement la version Python via pyenv
+- ✅ Crée un environnement isolé avec pipenv
+- ✅ Fonctionne sur tous les systèmes Unix/Linux/macOS
+
+### 📦 **Classique: Installation système**
+```bash
+./setup_ansible_env.sh
+```
+
+### 🔧 **Spécifique Fedora avec pyenv**
+```bash
+./setup_fedora.sh
+```
+
 ## Systèmes supportés
 
 Le script d'installation automatique supporte les distributions suivantes :
@@ -42,6 +64,24 @@ Ce script installe automatiquement Python 3.9+ si nécessaire sur Fedora.
 ./test_ansible_env.sh
 ```
 Ce script vérifie que tous les composants sont correctement installés.
+
+## Gestion des versions Python avec pyenv
+
+Le projet utilise un fichier `.python-version` qui spécifie la version Python recommandée (3.11.9).
+
+### Avantages de pyenv + pipenv
+- **Isolation complète** : Aucun impact sur le Python système
+- **Gestion des versions** : Facilite le passage entre différentes versions
+- **Reproductibilité** : Même environnement sur toutes les machines
+- **Pas de sudo requis** : Installation dans le répertoire utilisateur uniquement
+
+### Commandes pyenv utiles
+```bash
+pyenv versions              # Lister les versions installées
+pyenv global 3.11.9         # Définir version globale
+pyenv local 3.11.9          # Définir version pour le projet courant
+pyenv which python          # Voir quel Python est utilisé
+```
 
 ## Utilisation
 

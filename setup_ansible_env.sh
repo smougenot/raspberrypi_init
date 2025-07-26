@@ -38,6 +38,24 @@ detect_distro() {
 DISTRO=$(detect_distro)
 echo -e "${GREEN}Système détecté: ${DISTRO}${NC}"
 
+# Vérifier si pyenv est disponible et l'utiliser de préférence
+if command_exists pyenv && [ -f ".python-version" ]; then
+    echo -e "${GREEN}pyenv détecté avec fichier .python-version${NC}"
+    TARGET_VERSION=$(cat .python-version)
+    
+    # Initialiser pyenv
+    export PATH="$HOME/.pyenv/bin:$PATH"
+    eval "$(pyenv init --path)" 2>/dev/null || true
+    eval "$(pyenv init -)" 2>/dev/null || true
+    
+    if pyenv versions --bare | grep -q "^${TARGET_VERSION}$"; then
+        echo -e "${GREEN}✓ Utilisation de Python ${TARGET_VERSION} via pyenv${NC}"
+    else
+        echo -e "${YELLOW}Version Python ${TARGET_VERSION} non installée via pyenv${NC}"
+        echo -e "${YELLOW}Utilisez: ./setup_pyenv_pipenv.sh pour une installation complète${NC}"
+    fi
+fi
+
 # Fonction pour installer pipenv
 install_pipenv() {
     echo -e "${YELLOW}Installation de pipenv...${NC}"

@@ -2,7 +2,7 @@
 
 #
 # Script d'installation spécifique pour Fedora
-# Installe Python 3.9+ si nécessaire
+# Utilise pyenv + pipenv pour gérer Python sans modifier le système
 #
 
 set -e
@@ -13,7 +13,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo -e "${GREEN}=== Configuration Ansible pour Fedora ===${NC}"
+echo -e "${GREEN}=== Configuration Ansible pour Fedora avec pyenv ===${NC}"
 
 # Vérifier si on est sur Fedora
 if [ ! -f /etc/fedora-release ]; then
@@ -24,49 +24,120 @@ fi
 FEDORA_VERSION=$(cat /etc/fedora-release | grep -o '[0-9]\+' | head -1)
 echo -e "${GREEN}Fedora version détectée: ${FEDORA_VERSION}${NC}"
 
-# Installer Python 3.9+ si pas disponible
-if ! python3.9 --version >/dev/null 2>&1 && ! python3.10 --version >/dev/null 2>&1 && ! python3.11 --version >/dev/null 2>&1; then
-    echo -e "${YELLOW}Installation de Python 3.11...${NC}"
-    sudo dnf install -y python3.11 python3.11-pip python3.11-devel
+# Fonction pour vérifier si une commande existe
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Version Python cible pour Ansible (compatible avec ansible-lint)
+TARGET_PYTHON_VERSION="3.11.9"
+
+# Installer pyenv si pas présent
+if ! command_exists pyenv; then
+    echo -e "${YELLOW}Installation de pyenv...${NC}"
     
-    # Créer un lien symbolique pour faciliter l'utilisation
-    if [ ! -f /usr/local/bin/python3-ansible ]; then
-        sudo ln -s /usr/bin/python3.11 /usr/local/bin/python3-ansible
+    # Installer les dépendances de compilation sans toucher au Python système
+    echo -e "${YELLOW}Installation des dépendances de compilation...${NC}"
+    sudo dnf install -y make gcc zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel tk-devel libffi-devel xz-devel
+    
+    # Installer pyenv
+    curl https://pyenv.run | bash
+    
+    # Ajouter pyenv au PATH et aux shells
+    export PATH="$HOME/.pyenv/bin:$PATH"
+    
+    # Configuration pour bash
+    if [ -f ~/.bashrc ]; then
+        if ! grep -q 'pyenv init' ~/.bashrc; then
+            echo '' >> ~/.bashrc
+            echo '# pyenv configuration' >> ~/.bashrc
+            echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.bashrc
+            echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
+            echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+        fi
     fi
     
-    PYTHON_CMD="python3-ansible"
-else
-    # Utiliser la version disponible
-    for version in 3.11 3.10 3.9; do
-        if python${version} --version >/dev/null 2>&1; then
-            PYTHON_CMD="python${version}"
-            break
+    # Configuration pour zsh si présent
+    if [ -f ~/.zshrc ]; then
+        if ! grep -q 'pyenv init' ~/.zshrc; then
+            echo '' >> ~/.zshrc
+            echo '# pyenv configuration' >> ~/.zshrc
+            echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.zshrc
+            echo 'eval "$(pyenv init --path)"' >> ~/.zshrc
+            echo 'eval "$(pyenv init -)"' >> ~/.zshrc
         fi
-    done
+    fi
+    
+    # Initialiser pyenv pour cette session
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+    
+    echo -e "${GREEN}✓ pyenv installé${NC}"
+else
+    echo -e "${GREEN}✓ pyenv déjà présent${NC}"
+    
+    # S'assurer que pyenv est initialisé
+    export PATH="$HOME/.pyenv/bin:$PATH"
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
 fi
 
-echo -e "${GREEN}Utilisation de: $(${PYTHON_CMD} --version)${NC}"
+# Vérifier si la version Python cible est installée
+if ! pyenv versions --bare | grep -q "^${TARGET_PYTHON_VERSION}$"; then
+    echo -e "${YELLOW}Installation de Python ${TARGET_PYTHON_VERSION} via pyenv...${NC}"
+    pyenv install ${TARGET_PYTHON_VERSION}
+    echo -e "${GREEN}✓ Python ${TARGET_PYTHON_VERSION} installé${NC}"
+else
+    echo -e "${GREEN}✓ Python ${TARGET_PYTHON_VERSION} déjà installé${NC}"
+fi
 
-# Installer pipenv avec la bonne version de Python
-echo -e "${YELLOW}Installation de pipenv...${NC}"
-${PYTHON_CMD} -m pip install --user pipenv
+# Définir la version Python pour ce projet
+echo -e "${YELLOW}Configuration de Python ${TARGET_PYTHON_VERSION} pour ce projet...${NC}"
+pyenv local ${TARGET_PYTHON_VERSION}
 
-# Ajouter au PATH
+# Vérifier la version active
+ACTIVE_PYTHON_VERSION=$(python --version 2>&1)
+echo -e "${GREEN}Version Python active: ${ACTIVE_PYTHON_VERSION}${NC}"
+
+# Installer pipenv si pas présent
+if ! command_exists pipenv; then
+    echo -e "${YELLOW}Installation de pipenv...${NC}"
+    python -m pip install --user pipenv
+    
+    # Ajouter pipenv au PATH
+    export PATH="$HOME/.local/bin:$PATH"
+    if [ -f ~/.bashrc ]; then
+        grep -q 'PATH.*\.local/bin' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    fi
+    if [ -f ~/.zshrc ]; then
+        grep -q 'PATH.*\.local/bin' ~/.zshrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+    fi
+    
+    echo -e "${GREEN}✓ pipenv installé${NC}"
+else
+    echo -e "${GREEN}✓ pipenv déjà présent${NC}"
+fi
+
+# S'assurer que pipenv est dans le PATH
 export PATH="$HOME/.local/bin:$PATH"
-if [ -f ~/.bashrc ]; then
-    grep -q 'PATH.*\.local/bin' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+
+# Supprimer l'environnement existant s'il existe et utilise une mauvaise version
+if [ -f "Pipfile.lock" ]; then
+    echo -e "${YELLOW}Nettoyage de l'environnement existant...${NC}"
+    pipenv --rm 2>/dev/null || true
 fi
 
-# Configurer pipenv pour utiliser la bonne version de Python
-export PIPENV_PYTHON=${PYTHON_CMD}
-
-# Créer l'environnement avec la bonne version
-echo -e "${YELLOW}Configuration de l'environnement Ansible...${NC}"
-pipenv --python ${PYTHON_CMD} install
+# Créer l'environnement avec la version Python gérée par pyenv
+echo -e "${YELLOW}Configuration de l'environnement Ansible avec pipenv...${NC}"
+pipenv install
 
 echo -e "${GREEN}=== Configuration terminée ===${NC}"
-echo -e "${GREEN}Environnement Ansible configuré avec $(${PYTHON_CMD} --version)${NC}"
+echo -e "${GREEN}Environnement Ansible configuré avec Python ${TARGET_PYTHON_VERSION}${NC}"
+echo -e "${GREEN}Géré par pyenv (pas d'impact sur le système hôte)${NC}"
 echo ""
 echo -e "${YELLOW}Pour utiliser l'environnement:${NC}"
 echo "  pipenv shell"
 echo "  pipenv run ansible --version"
+echo ""
+echo -e "${YELLOW}Pour vérifier l'installation:${NC}"
+echo "  ./test_ansible_env.sh"

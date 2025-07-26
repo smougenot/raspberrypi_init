@@ -1,24 +1,24 @@
 ---
 
-- name: update pi user to add ssh authorisez keys
+- name: update {{ raspian_first_boot_pi_user }} user to add ssh authorisez keys
   authorized_key:
-    user: 'pi'
+    user: "{{ raspian_first_boot_pi_user }}"
     state: present
     key: "{{ lookup('file', raspian_first_boot_pi_pub_key) }}"
 
-- name: update pi user password
+- name: update {{ raspian_first_boot_pi_user }} user password
   user:
-    name: 'pi'
+    name: "{{ raspian_first_boot_pi_user }}"
     password: '{{ raspian_first_boot_pi_password }}'
     update_password: 'always'
   when: raspian_first_boot_pi_password is defined and raspian_first_boot_pi_password | trim | length > 0
 
-- name: update pi user, add aliases
+- name: update {{ raspian_first_boot_pi_user }} user, add aliases
   copy:
     src: 'bash_aliases'
-    dest: '/home/pi/.bash_aliases'
-    owner: 'pi'
-    group: 'pi'
+    dest: "{{ raspian_first_boot_pi_home }}/.bash_aliases"
+    owner: "{{ raspian_first_boot_pi_user }}"
+    group: "{{ raspian_first_boot_pi_user }}"
     mode: 0644
 
 - name: update useradd skel, add aliases
@@ -31,7 +31,7 @@
 
 - name: update pi user, tune bashrc
   lineinfile:
-    path: '/home/pi/.bashrc'
+    path: "{{ raspian_first_boot_pi_home }}/.bashrc"
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
     state: present

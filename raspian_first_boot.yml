@@ -1,5 +1,5 @@
 ---
-- hosts : 192.168.105.226
+- hosts : pi
   become: true
 
   roles:

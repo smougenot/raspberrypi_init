@@ -13,4 +13,5 @@ extra_vars="${extra_vars} raspian_first_boot_ssh_port="
 ansible-playbook \
   --extra-vars="${extra_vars}" \
   --inventory inventory/ --ask-pass \
-  -vvv raspian_first_boot.yml
+  --limit "${target_host:-none}" \
+  -vv raspian_first_boot.yml

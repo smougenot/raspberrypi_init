@@ -27,8 +27,11 @@
   when: firewall_open_ports is not defined
 
 - name: docker compatibility
+  # based on https://github.com/chaifeng/ufw-docker
   blockinfile:
-    path: /etc/network/interfaces
+    path: /etc/ufw/after.rules
+    append_newline: true
+    prepend_newline: true
     block: |
       # BEGIN UFW AND DOCKER
       *filter
