@@ -3,3 +3,6 @@
 
 keys/*
 !keys/generate_keys.sh
+
+!setup_*.sh
+!test_ansible_env.sh

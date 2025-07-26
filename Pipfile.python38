@@ -1,0 +1,15 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+ansible = ">=5.0,<8.0"
+yamllint = "*"
+jmespath = "*"
+# ansible-lint désactivé pour Python < 3.9
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
