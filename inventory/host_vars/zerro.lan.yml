@@ -1,0 +1,5 @@
+---
+ansible_ssh_user: Sylvain
+ansible_python_interpreter: /usr/bin/python3
+dbs_hostname: 'zerro.lan'
+docker_users: [Sylvain]
