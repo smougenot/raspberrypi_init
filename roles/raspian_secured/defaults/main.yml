@@ -1,0 +1,4 @@
+---
+raspian_first_boot_pi_user: "pi"
+raspian_first_boot_pi_password: "raspberry"
+raspian_first_boot_pi_home: "/home/{{ raspian_first_boot_pi_user }}"
