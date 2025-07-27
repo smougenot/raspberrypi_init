@@ -1,0 +1,21 @@
+################################################################################
+# Telemetry Stack
+################################################################################
+# docker stack deploy telemetry --compose-file compose.yml
+################################################################################
+services:
+  v4l2rtspserver:
+    image: mpromonet/v4l2rtspserver
+    ports:
+      - "8554:8554"
+    volumes:
+      - /dev/video0:/dev/video0
+    # add arguents to the container
+    command: >
+      - --p 8554
+      - --video-device=/dev/video0
+
+    environment:
+#      - RTSP_PORT=8554
+#      - VIDEO_DEVICE=/dev/video0
+      - TZ=Europe/Paris

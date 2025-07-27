@@ -6,12 +6,14 @@ collections:
     version: ">=3.0.0"
   - name: ansible.posix
     version: ">=1.0.0"
+  - name: community.docker
+    version: "4.6.1"
 
 roles:
-  # Example roles that might be useful for Raspberry Pi
+#   # Example roles that might be useful for Raspberry Pi
   - name: geerlingguy.docker
     version: "4.2.0"
   - name: geerlingguy.pip
-    version: "2.1.0"
-  
+    version: ">=2.1.0"
+
 # You can add more roles as needed
