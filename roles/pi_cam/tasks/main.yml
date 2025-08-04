@@ -1,48 +1,49 @@
 ---
 
+
 # run commande to activate cam driver
 - name: Load the camera driver
   ansible.builtin.command: /usr/bin/sudo /usr/sbin/modprobe bcm2835-v4l2
   when: ansible_facts['os_family'] == 'Debian'
 
-# deploy docker-compose for camera streaming
-- name: Create directory for camera streaming service
-  ansible.builtin.file:
-    path: /opt/stream_server
-    state: directory
-    owner: root
-    group: root
-    mode: '0755'
-
-- name: Copy docker-compose file for camera streaming service
-  ansible.builtin.copy:
-    src: docker-compose.yml
-    dest: /opt/stream_server/docker-compose.yml
-    owner: root
-    group: root
-    mode: '0644'
-
-# add docker container for camera streaming using docker-compose
-- name: Deploy camera streaming service using docker-compose
-  community.docker.docker_compose_v2:
-    project_src: /opt/stream_server
-    pull: missing
+# ensure build required tools are installed
+- name: Ensure build tools are installed
+  ansible.builtin.package:
+    name:
+      - build-essential
+      - cmake
+      - git
     state: present
-  register: output
   when: ansible_facts['os_family'] == 'Debian'
 
-- name: Show results
-  ansible.builtin.debug:
-    var: output
+# manual install from git source for the rts stream server
+- name: git clone the v4l2rtspserver
+  ansible.builtin.git:
+    repo: "{{ rts_server_git_repo }}"
+    dest: /home/{{ ansible_ssh_user }}/v4l2rtspserver
+    version: master
+  when: ansible_facts['os_family'] == 'Debian'
 
-# check service is up and running
-- name: Verify that web and db services are not running
-  ansible.builtin.assert:
-    that:
-      - stream_container.State = 'running'
-  vars:
-    stream_container: >-
-      {{ output.containers | selectattr("Service", "equalto", "web") | first }}
+# build the rts stream server
+- name: Build the v4l2rtspserver
+  ansible.builtin.command:
+    cmd: >
+      /usr/bin/sudo /bin/bash -c 'cd /home/{{ ansible_ssh_user }}/v4l2rtspserver && cmake . && make && make install'
+  when: ansible_facts['os_family'] == 'Debian'
+
+# define systemctl service for the rts stream server
+- name: Create systemd service for v4l2rtspserver
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/v4l2rtspserver.service
+    content: |
+      [Unit]
+      Description=RTSP Server for Raspberry Pi Camera
+      After=network.target
+      [Service]
+      ExecStart=/usr/local/bin/v4l2rtspserver -F 30 -W 640 -H 480 -P 8554 /dev/video0
+      Restart=always
+      [Install]
+      WantedBy=multi-user.target
 
 # open ufw port for camera streaming
 - name: Open UFW port for camera streaming

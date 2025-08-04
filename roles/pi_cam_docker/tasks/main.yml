@@ -1,0 +1,52 @@
+---
+
+# run commande to activate cam driver
+- name: Load the camera driver
+  ansible.builtin.command: /usr/bin/sudo /usr/sbin/modprobe bcm2835-v4l2
+  when: ansible_facts['os_family'] == 'Debian'
+
+# deploy docker-compose for camera streaming
+- name: Create directory for camera streaming service
+  ansible.builtin.file:
+    path: /opt/stream_server
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy docker-compose file for camera streaming service
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: /opt/stream_server/docker-compose.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+# add docker container for camera streaming using docker-compose
+- name: Deploy camera streaming service using docker-compose
+  community.docker.docker_compose_v2:
+    project_src: /opt/stream_server
+    pull: missing
+    state: present
+  register: output
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Show results
+  ansible.builtin.debug:
+    var: output
+
+# check service is up and running
+- name: Verify that web and db services are not running
+  ansible.builtin.assert:
+    that:
+      - stream_container.State = 'running'
+  vars:
+    stream_container: >-
+      {{ output.containers | selectattr("Service", "equalto", "web") | first }}
+
+# open ufw port for camera streaming
+- name: Open UFW port for camera streaming
+  ansible.builtin.ufw:
+    rule: allow
+    port: 8554
+  when: ansible_facts['os_family'] == 'Debian'
