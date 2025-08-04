@@ -1,0 +1,85 @@
+# prepare destination directory
+- name: Create destination directory
+  ansible.builtin.file:
+    path: "/opt/go2rtc"
+    state: directory
+    mode: '0755'
+    group: "users"
+
+# decode variant depending on os uname
+
+# default, set go2rtc variant to uname result
+- name: Set go2rtc variant for default
+  set_fact:
+    go2rtc_variant: "{{ ansible_architecture }}"
+- name: Set go2rtc variant for arm
+  set_fact:
+    go2rtc_variant: "armv6"
+  when: ansible_architecture == 'armv'
+- name: Set go2rtc variant for aarch64
+  set_fact:
+    go2rtc_variant: "arm64"
+  when: ansible_architecture == 'aarch64'
+
+# download go2rtc
+- name: Download go2rtc
+  ansible.builtin.get_url:
+    url: "https://github.com/AlexxIT/go2rtc/releases/latest/download/go2rtc_linux_{{ go2rtc_variant }}"
+    dest: "/opt/go2rtc/go2rtc"
+    mode: '0755'
+    group: "users"
+  notify:
+    - Restart go2rtc service
+
+# create symlink to go2rtc binary
+- name: Create symlink for go2rtc binary
+  ansible.builtin.file:
+    src: "/opt/go2rtc/go2rtc"
+    dest: "/usr/local/bin/go2rtc"
+    state: link
+    mode: '0755'
+
+# create configuration file
+- name: Create go2rtc configuration file
+  ansible.builtin.template:
+    src: "go2rtc.yml.j2"
+    dest: "/opt/go2rtc/go2rtc.yml"
+    mode: '0644'
+    group: "users"
+  notify:
+    - Restart go2rtc service
+
+# create environment file
+- name: Create go2rtc environment file
+  ansible.builtin.template:
+    src: "go2rtc.env.j2"
+    dest: "/opt/go2rtc/go2rtc.env"
+    mode: '0644'
+    group: "users"
+  notify:
+    - Restart go2rtc service
+
+# create systemd service for go2rtc
+- name: Create systemd service for go2rtc
+  ansible.builtin.template:
+    src: "go2rtc.service.j2"
+    dest: "/etc/systemd/system/go2rtc.service"
+    mode: '0644'
+    group: "root"
+  notify:
+    - daemon-reload
+    - Restart go2rtc service
+
+# open firewall ufw for go2rtc port
+- name: Open firewall for go2rtc port
+  ansible.builtin.ufw:
+    rule: allow
+    comment: "Allow go2rtc streaming"
+    port: 8554
+    proto: tcp
+- name: Open firewall for go2rtc port
+  ansible.builtin.ufw:
+    rule: allow
+    comment: "Allow go2rtc web interface"
+    port: 1984
+    proto: tcp

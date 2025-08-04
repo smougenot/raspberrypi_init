@@ -1,0 +1,21 @@
+# go2rtc systemd service
+[Unit]
+Description=go2rtc for webcam streaming
+After=udev.service network-online.target nss-lookup.target
+Wants=udev.service network-online.target
+StartLimitBurst=10
+StartLimitIntervalSec=180
+
+[Service]
+Type=simple
+RestartSec=5
+EnvironmentFile=-/opt/go2rtc/go2rtc.env
+ExecStart=/usr/local/bin/go2rtc
+Restart=on-failure
+Nice=10
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+CPUWeight=20
+
+[Install]
+WantedBy=multi-user.target
