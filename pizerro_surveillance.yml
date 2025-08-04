@@ -5,7 +5,7 @@
   roles:
     #- ansible-debian-bootstrap
     #- raspian_prepare_docker_compose
-    - geerlingguy.docker
+    #- geerlingguy.docker
     -  pi_switch_off_button
     - {
         role: pi_cam,

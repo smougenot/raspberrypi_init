@@ -1,0 +1,17 @@
+---
+- hosts : pi4.lan
+  become: true
+
+  roles:
+    - ansible-debian-bootstrap
+    - raspian_prepare_docker_compose
+    - pi_switch_off_button
+    - {
+        role: go2rtc,
+        tags: ['go2rtc']
+      }
+    # - {
+    #     role: pi_cam,
+    #     tags: ['pi_cam']
+    #   }
+    #- geerlingguy.docker
